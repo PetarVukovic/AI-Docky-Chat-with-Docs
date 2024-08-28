@@ -235,7 +235,7 @@ def home_page():
                         user = login_user(login_email, login_password)
                         if user:
                             st.session_state.user = user
-                            st.success("You have logged in successfully!")
+                            st.sidebar.success("You have logged in successfully!")
                             handle_successful_login()  # Redirect to collections.py
                         else:
                             st.error("Invalid credentials. Please try again.")
@@ -257,7 +257,7 @@ def home_page():
                         user = register_user(register_email, register_password)
                         if user:
                             st.session_state.user = user
-                            st.success(
+                            st.sidebar.success(
                                 "Registration successful! You are now logged in."
                             )
                             handle_successful_login()  # Redirect to collections.py

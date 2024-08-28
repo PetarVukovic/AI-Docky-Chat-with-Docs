@@ -1,6 +1,6 @@
 import streamlit as st
 from db_utils import get_user_collections
-from document_service import DocumentService
+from services.document_service import DocumentService
 from streamlit_chat import message
 
 
@@ -32,18 +32,10 @@ def process_input():
             try:
                 response = st.session_state.document_service.ask_question(user_question)
                 if response:
-                    ai_response = response.response
+                    ai_response = str(response)  # Convert the response to a string
                     st.session_state.messages.append(
                         {"role": "assistant", "content": ai_response}
                     )
-
-                    # Display sources in a collapsible section
-                    if response.source_nodes:
-                        with st.expander("View Sources"):
-                            for node_with_score in response.source_nodes:
-                                node = node_with_score.node
-                                st.markdown(f"**Text Snippet:** *{node.text[:200]}...*")
-                                st.markdown("---")
                 else:
                     st.error(
                         "Unable to find an answer. Please try rephrasing your question."
@@ -84,8 +76,13 @@ def chat_page():
     st.title("Chat with Your Documents")
     display_chat_messages()
 
-    st.text_input(
-        "Ask a question about your documents:",
-        key="user_input",
-        on_change=process_input,
-    )
+    if st.session_state.document_service.agent is None:
+        st.error(
+            "The agent is not initialized. Please select a collection and set up the index."
+        )
+    else:
+        st.text_input(
+            "Ask a question about your documents:",
+            key="user_input",
+            on_change=process_input,
+        )
