@@ -1,4 +1,4 @@
-llama_index==0.10.56
+llama_index==0.11.2
 llama_parse==0.5.0
 pandas==2.2.2
 qdrant_client==1.11.1
