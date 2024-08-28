@@ -24,7 +24,7 @@ cffi==1.16.0
 charset-normalizer==3.3.2
 cleo==2.1.0
 click==8.1.7
-colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1666700638685/work
+colorama 
 composio_core==0.5.2
 composio_openai==0.5.2
 composio_phidata==0.5.2
