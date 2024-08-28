@@ -3,8 +3,7 @@ import pandas as pd
 import streamlit as st
 from llama_index.core import VectorStoreIndex, StorageContext, Document
 from llama_parse import LlamaParse
-from llama_index.vector_stores.qdrant import QdrantVectorStore
-from qdrant_client import QdrantClient
+from llama_index.vector_stores.qdrant.base import QdrantVectorStore
 from db_services import DBService
 
 
