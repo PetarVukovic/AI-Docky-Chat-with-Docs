@@ -15,6 +15,28 @@ st.set_page_config(
     page_title="AI Chat with Your Documents", page_icon="📄", layout="wide"
 )
 
+# Custom CSS for styling sidebar and other elements
+st.markdown(
+    """
+    <style>
+    /* Custom styling for the sidebar */
+    .css-1l02m7d { /* Adjust this class if necessary */
+        width: 320px; /* Increase the width of the sidebar */
+    }
+    .css-1v3fvcr { /* Adjust this class if necessary */
+        font-size: 22px; /* Increase font size of text in the sidebar */
+    }
+    .css-1v3fvcr i { /* Increase size of icons in the sidebar */
+        font-size: 24px;
+    }
+    .css-1v3fvcr .st-bd { /* Increase padding for sidebar items */
+        padding: 15px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # Sidebar navigation
 with st.sidebar:
     selected_page = option_menu(
@@ -25,9 +47,9 @@ with st.sidebar:
         default_index=0,
         styles={
             "container": {"padding": "5px", "background-color": "#282c34"},
-            "icon": {"font-size": "20px", "color": "#61dafb"},
+            "icon": {"font-size": "24px", "color": "#61dafb"},  # Increase icon size
             "nav-link": {
-                "font-size": "18px",
+                "font-size": "20px",  # Increase text size
                 "text-align": "left",
                 "margin": "0px",
                 "--hover-color": "#21a1f1",
