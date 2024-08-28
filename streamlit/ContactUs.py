@@ -5,7 +5,6 @@ import smtplib
 def contact_us_page():
     st.title("Contact Us")
 
-    # Form to send email
     with st.form("email_form"):
         st.write("Send us an email with your query or feedback:")
         user_email = st.text_input("Your Email")
@@ -15,10 +14,8 @@ def contact_us_page():
         submit = st.form_submit_button("Send")
 
         if submit:
-            # Add your SMTP logic here
             if user_email and subject and message:
                 try:
-                    # Replace these values with your actual SMTP server details and credentials
                     smtp_server = "smtp.gmail.com"
                     smtp_port = 587
                     sender_email = "your_email@example.com"
@@ -37,7 +34,3 @@ def contact_us_page():
                     st.error(f"Error sending email: {e}")
             else:
                 st.error("Please fill in all fields.")
-
-
-if __name__ == "__main__":
-    contact_us_page()

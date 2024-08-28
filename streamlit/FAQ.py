@@ -31,7 +31,3 @@ def faq_page():
     for faq in faqs:
         with st.expander(f"❓ {faq['question']}"):
             st.write(faq["answer"])
-
-
-if __name__ == "__main__":
-    faq_page()
