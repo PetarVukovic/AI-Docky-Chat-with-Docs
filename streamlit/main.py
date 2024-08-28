@@ -2,6 +2,7 @@ import os
 import streamlit as st
 from streamlit_option_menu import option_menu
 from llama_index.embeddings.openai import OpenAIEmbedding
+import llama_index
 from Home import home_page
 from Chat import chat_page
 from Collections import collections_page
@@ -10,6 +11,8 @@ from FAQ import faq_page
 from db_services import DBService
 from document_service import DocumentService  # Import DBService if needed
 
+# Print out the contents of the llama_index package directory
+print("llama_index directory structure:", os.listdir(llama_index.__path__[0]))
 # Set up the Streamlit app
 st.set_page_config(
     page_title="AI Chat with Your Documents", page_icon="📄", layout="wide"
