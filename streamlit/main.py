@@ -77,9 +77,7 @@ with st.sidebar:
 if "document_service" not in st.session_state:
     st.session_state.document_service = DocumentService(
         api_key=os.getenv("LLAMA_CLOUD_API_KEY"),
-        embedding_model=OpenAIEmbedding(
-            api_key="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"
-        ),
+        embedding_model=OpenAIEmbedding(),
     )
 
 # Map selected page to functions
