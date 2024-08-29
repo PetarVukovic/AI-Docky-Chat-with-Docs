@@ -9,6 +9,7 @@ from ContactUs import contact_us_page
 from FAQ import faq_page
 from services.db_services import DBService
 from services.document_service import DocumentService  # Import DBService if needed
+from Pricing import pricing_page  # Import the new Pricing page
 
 # Set up the Streamlit app
 st.set_page_config(
@@ -41,8 +42,22 @@ st.markdown(
 with st.sidebar:
     selected_page = option_menu(
         menu_title=None,
-        options=["🏠 Home", "📁 Collections", "🤖 Chat", "❓ FAQ", "📧 Contact Us"],
-        icons=["house", "folder", "chat-dots", "question-circle", "envelope"],
+        options=[
+            "🏠 Home",
+            "📁 Collections",
+            "🤖 Chat",
+            "❓ FAQ",
+            "📧 Contact Us",
+            "💳 Pricing",
+        ],
+        icons=[
+            "house",
+            "folder",
+            "chat-dots",
+            "question-circle",
+            "envelope",
+            "credit-card",
+        ],
         menu_icon="cast",
         default_index=0,
         styles={
@@ -62,7 +77,9 @@ with st.sidebar:
 if "document_service" not in st.session_state:
     st.session_state.document_service = DocumentService(
         api_key=os.getenv("LLAMA_CLOUD_API_KEY"),
-        embedding_model=OpenAIEmbedding(),
+        embedding_model=OpenAIEmbedding(
+            api_key="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"
+        ),
     )
 
 # Map selected page to functions
@@ -76,3 +93,5 @@ elif selected_page == "❓ FAQ":
     faq_page()
 elif selected_page == "📧 Contact Us":
     contact_us_page()
+elif selected_page == "💳 Pricing":
+    pricing_page()  # Show the pricing page

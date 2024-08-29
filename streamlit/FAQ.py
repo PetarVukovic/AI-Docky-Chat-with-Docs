@@ -26,6 +26,15 @@ def faq_page():
             "question": "How do I create a collection?",
             "answer": "After logging in, use the 'Manage Collections' feature to organize your documents.",
         },
+        {
+            "question": "How does this application differ from ChatGPT?",
+            "answer": (
+                "Unlike ChatGPT, where you need to re-upload your files every time you log in and wait for responses, "
+                "our application allows you to store your documents in collections permanently. Once uploaded, your documents are always available, "
+                "and the AI agent remembers your data, so you don't have to repeat the process every time you log in. This means quicker access "
+                "to insights and a more seamless experience."
+            ),
+        },
     ]
 
     for faq in faqs:

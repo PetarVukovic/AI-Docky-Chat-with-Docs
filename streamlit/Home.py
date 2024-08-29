@@ -1,23 +1,32 @@
 import streamlit as st
-from db_utils import login_user, register_user
+from db_utils import (
+    add_collection_to_user,
+    get_user_collections,
+    login_user,
+    register_user,
+)
 
 
 def home_page():
     # Initialize the session state for sidebar visibility and selected action
     if "show_sidebar" not in st.session_state:
         st.session_state.show_sidebar = False
-        st.session_state.action = "none"
+    if "user" not in st.session_state:
+        st.session_state.user = None
+    if "collections" not in st.session_state:
+        st.session_state.collections = []
 
     # Function to toggle sidebar visibility
     def toggle_sidebar():
         st.session_state.show_sidebar = not st.session_state.show_sidebar
-        if st.session_state.show_sidebar:
-            st.session_state.action = "login_or_register"
 
     # Function to handle successful login
-    def handle_successful_login():
+    # Function to handle successful login
+    def handle_successful_login(user_id):
+        st.session_state.user = user_id
+        st.session_state.collections = get_user_collections(user_id)
         st.session_state.show_sidebar = False
-        st.rerun()  # Automatically rerun to load the new page
+        st.rerun()
 
     # Custom CSS for styling
     st.markdown(
@@ -217,51 +226,55 @@ def home_page():
     if st.session_state.show_sidebar:
         st.sidebar.header("Login / Register")
 
-        # Option to choose between login and registration
-        option = st.sidebar.selectbox("Choose an option", ["Log In", "Register"])
+        option = st.sidebar.selectbox("Odaberite opciju", ["Prijava", "Registracija"])
 
-        if option == "Log In":
-            # Login Form
+        if option == "Prijava":
             with st.sidebar.form(key="login_form"):
-                st.write("🔑 Log In")
-                login_email = st.text_input("Email", key="login_email")
+                st.write("🔑 Prijava")
+                login_username = st.text_input("Korisničko ime", key="login_username")
                 login_password = st.text_input(
-                    "Password", type="password", key="login_password"
+                    "Lozinka", type="password", key="login_password"
                 )
-                login_button = st.form_submit_button("Log In")
+                login_button = st.form_submit_button("Prijava")
 
                 if login_button:
-                    if login_email and login_password:
-                        user = login_user(login_email, login_password)
+                    if login_username and login_password:
+                        user = login_user(login_username, login_password)
                         if user:
-                            st.session_state.user = user
-                            st.sidebar.success("You have logged in successfully!")
-                            handle_successful_login()  # Redirect to collections.py
+                            handle_successful_login(user[0])  # Pass user_id
                         else:
-                            st.error("Invalid credentials. Please try again.")
+                            st.error(
+                                "Nevažeći podaci za prijavu. Molimo pokušajte ponovno."
+                            )
                     else:
-                        st.warning("Please enter both email and password.")
+                        st.warning("Molimo unesite korisničko ime i lozinku.")
 
-        elif option == "Register":
-            # Registration Form
+        elif option == "Registracija":
             with st.sidebar.form(key="registration_form"):
-                st.write("📝 Register")
-                register_email = st.text_input("Email", key="register_email")
-                register_password = st.text_input(
-                    "Password", type="password", key="register_password"
+                st.write("📝 Registracija")
+                register_username = st.text_input(
+                    "Korisničko ime", key="register_username"
                 )
-                register_button = st.form_submit_button("Register")
+                register_password = st.text_input(
+                    "Lozinka", type="password", key="register_password"
+                )
+                register_button = st.form_submit_button("Registracija")
 
                 if register_button:
-                    if register_email and register_password:
-                        user = register_user(register_email, register_password)
-                        if user:
-                            st.session_state.user = user
+                    if register_username and register_password:
+                        if register_user(register_username, register_password):
                             st.sidebar.success(
-                                "Registration successful! You are now logged in."
+                                "Registracija uspješna! Sada se možete prijaviti."
                             )
-                            handle_successful_login()  # Redirect to collections.py
                         else:
-                            st.error("Registration failed. Please try again.")
+                            st.error(
+                                "Registracija nije uspjela. Korisničko ime možda već postoji."
+                            )
                     else:
-                        st.warning("Please enter both email and password.")
+                        st.warning("Molimo unesite korisničko ime i lozinku.")
+    # If user is logged in, show their collections
+    if st.session_state.user:
+        if st.sidebar.button("Odjava"):
+            st.session_state.user = None
+            st.session_state.collections = []
+            st.rerun()

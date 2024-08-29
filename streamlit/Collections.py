@@ -8,7 +8,7 @@ def collections_page():
 
     if "user" in st.session_state and st.session_state.user:
         st.title("📚 Your Collections")
-        user_id = st.session_state.user[0]
+        user_id = st.session_state.user  # Ovo sada direktno koristi user ID
         collections = get_user_collections(user_id)
         st.subheader("Create a New Collection")
         new_collection_name = st.text_input("Collection name")
@@ -20,7 +20,11 @@ def collections_page():
         if st.button("Create Collection"):
             if new_collection_name and uploaded_files:
                 if len(uploaded_files) <= 3:
-                    add_collection_to_user(user_id, new_collection_name)
+                    # Postavljamo document_type kao ime nove kolekcije
+                    document_type = new_collection_name
+                    add_collection_to_user(
+                        user_id, new_collection_name, document_type=document_type
+                    )
                     for uploaded_file in uploaded_files:
                         with tempfile.NamedTemporaryFile(
                             delete=False,

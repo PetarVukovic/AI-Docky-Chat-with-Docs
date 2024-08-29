@@ -5,25 +5,31 @@ import hashlib
 def create_db():
     conn = sqlite3.connect("user_collections.db")
     cursor = conn.cursor()
+
+    # Kreiranje tabele za korisnike ako ne postoji
     cursor.execute(
         """
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL
-    )
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        );
     """
     )
+
+    # Kreiranje tabele collections ako ne postoji
     cursor.execute(
         """
-    CREATE TABLE IF NOT EXISTS collections (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        collection_name TEXT NOT NULL,
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    )
+        CREATE TABLE IF NOT EXISTS collections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            collection_name TEXT NOT NULL,
+            document_type TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
     """
     )
+
     conn.commit()
     conn.close()
 
@@ -33,6 +39,7 @@ def hash_password(password):
 
 
 def register_user(username, password):
+    create_db()  # Ensure the database and tables are created before any operation
     conn = sqlite3.connect("user_collections.db")
     cursor = conn.cursor()
     hashed_password = hash_password(password)
@@ -50,6 +57,7 @@ def register_user(username, password):
 
 
 def login_user(username, password):
+    create_db()  # Ensure the database and tables are created before any operation
     conn = sqlite3.connect("user_collections.db")
     cursor = conn.cursor()
     hashed_password = hash_password(password)
@@ -63,22 +71,25 @@ def login_user(username, password):
 
 
 def get_user_collections(user_id):
+    create_db()  # Ensure the database and tables are created before any operation
     conn = sqlite3.connect("user_collections.db")
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT collection_name FROM collections WHERE user_id = ?", (user_id,)
+        "SELECT collection_name, document_type FROM collections WHERE user_id = ?",
+        (user_id,),
     )
     collections = cursor.fetchall()
     conn.close()
-    return [collection[0] for collection in collections]
+    return collections
 
 
-def add_collection_to_user(user_id, collection_name):
+def add_collection_to_user(user_id, collection_name, document_type):
+    create_db()  # Ensure the database and tables are created before any operation
     conn = sqlite3.connect("user_collections.db")
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO collections (user_id, collection_name) VALUES (?, ?)",
-        (user_id, collection_name),
+        "INSERT INTO collections (user_id, collection_name, document_type) VALUES (?, ?, ?)",
+        (user_id, collection_name, document_type),
     )
     conn.commit()
     conn.close()
