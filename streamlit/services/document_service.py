@@ -14,6 +14,7 @@ from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.query_engine import PandasQueryEngine
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.query_engine import RetrieverQueryEngine
+from llama_index.experimental.query_engine import PandasQueryEngine
 import nest_asyncio
 
 # Apply async loop patch
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class UserSession:
-    def __init__(self, user_id: str):
+    def __init__(self, user_id: int):
         self.user_id = user_id
         self.chat_history: Dict[str, List[Dict[str, str]]] = {}
 
@@ -57,12 +58,12 @@ class DocumentService:
         self.document_type: Dict[str, str] = {}
         self.llm = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), model="gpt-4o-mini")
         self.agents: Dict[str, ReActAgent] = {}
-        self.user_sessions: Dict[str, UserSession] = {}
+        self.user_sessions: Dict[int, UserSession] = {}
         self.memory_buffers: Dict[str, ChatMemoryBuffer] = {}
         self.dataframes: Dict[str, pd.DataFrame] = {}
         logger.info("DocumentService initialized successfully.")
 
-    def get_user_session(self, user_id: str) -> UserSession:
+    def get_user_session(self, user_id: int) -> UserSession:
         if user_id not in self.user_sessions:
             self.user_sessions[user_id] = UserSession(user_id)
         return self.user_sessions[user_id]
@@ -207,7 +208,7 @@ class DocumentService:
         logger.info(f"ReAct agent setup complete for collection: {collection_name}")
 
     def ask_question(
-        self, user_id: str, collection_name: str, question: str
+        self, user_id: int, collection_name: str, question: str
     ) -> Optional[Union[str, pd.DataFrame]]:
         logger.info(
             f"Asking question for user {user_id} in collection {collection_name}: {question}"
@@ -240,7 +241,7 @@ class DocumentService:
                         return table_response
                 else:
                     formatted_response = (
-                        f"As an AI data analyst, here's my analysis:\n\n{response}"
+                        f"Odgovor:\n\n{response}"
                     )
                     user_session.add_message(
                         collection_name, "assistant", formatted_response

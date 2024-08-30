@@ -218,10 +218,6 @@ def home_page():
     except Exception as e:
         st.error(f"Could not load the video. Error: {e}")
 
-    # Button to toggle sidebar visibility
-    if st.sidebar.button("Zapocni"):
-        toggle_sidebar()
-
     # Show sidebar if toggle is activated
     if st.session_state.show_sidebar:
         st.sidebar.header("Login / Register")

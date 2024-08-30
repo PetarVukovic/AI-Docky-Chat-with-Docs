@@ -10,7 +10,7 @@ def init_session_state():
     if "messages" not in st.session_state:
         st.session_state.messages = {}
     if "document_service" not in st.session_state:
-        user_id = st.session_state.get("user", "default_user")
+        user_id = st.session_state.get("user", {}).get("id", "default_user")
         st.session_state.document_service = DocumentService(
             api_key="your_api_key", embedding_model="your_model"
         )
@@ -55,7 +55,7 @@ def format_table_response(df):
     return df.to_html(index=False, classes=["table", "table-striped", "table-hover"])
 
 
-def process_input(collection_name):
+def process_input(user_id: int, collection_name: str):
     if st.session_state.user_input:
         user_question = st.session_state.user_input
         if collection_name not in st.session_state.messages:
@@ -67,7 +67,6 @@ def process_input(collection_name):
         st.session_state.thinking = True
 
         try:
-            user_id = st.session_state.get("user", "default_user")
             document_type = st.session_state.document_service.get_document_type(
                 collection_name
             )
@@ -118,7 +117,7 @@ def chat_page():
     st.sidebar.title("💬 Document Chat")
 
     if "user" in st.session_state and st.session_state.user:
-        user_id = st.session_state.user
+        user_id = st.session_state.user["id"]
         collections = get_user_collections(user_id)
 
         if collections:
@@ -166,14 +165,14 @@ def chat_page():
                     "Ask a question about your documents:",
                     key="user_input",
                     on_change=process_input,
-                    args=(collection_name,),
+                    args=(user_id, collection_name),
                 )
         else:
-            st.sidebar.info(
+            st.info(
                 "You don't have any collections yet. Go to the Collections page to create one!"
             )
     else:
-        st.sidebar.warning("Please log in to chat with your documents.")
+        st.warning("Please log in to chat with your documents.")
         return
 
     st.markdown(
