@@ -1,9 +1,10 @@
 import os
 from typing import List, Dict, Optional, Tuple, Union
+from grpc import ServicerContext
 import pandas as pd
 import streamlit as st
 import logging
-from llama_index.core import VectorStoreIndex, StorageContext, Document, ServiceContext
+from llama_index.core import VectorStoreIndex, StorageContext, Document
 from llama_parse import LlamaParse
 from llama_index.vector_stores.qdrant import QdrantVectorStore
 from services.db_services import DBService
@@ -82,7 +83,9 @@ class DocumentService:
             storage_context = StorageContext.from_defaults(vector_store=vector_store)
 
             if is_existing:
-                self.index = VectorStoreIndex.from_vector_store(vector_store)
+                self.index = VectorStoreIndex.from_vector_store(
+                    vector_store, service_context=self.llm
+                )
                 logger.info(f"Using existing collection: {collection_name}")
             else:
                 if documents_path is None:
@@ -98,11 +101,10 @@ class DocumentService:
 
                 self.document_type[collection_name] = doc_type
 
-                service_context = ServiceContext.from_defaults(llm=self.llm)
                 self.index = VectorStoreIndex.from_documents(
                     documents=documents,
                     storage_context=storage_context,
-                    service_context=service_context,
+                    service_context=self.llm,
                     show_progress=True,
                 )
                 logger.info(f"New collection {collection_name} created and indexed.")
@@ -116,6 +118,7 @@ class DocumentService:
             st.error(f"Error setting up index: {str(e)}")
             self.index = None
             self.collection_initialized = False
+            raise  # Re-raise
 
     def load_documents(self, documents_path: str) -> Tuple[List[Document], str]:
         _, file_extension = os.path.splitext(documents_path)
@@ -166,9 +169,7 @@ class DocumentService:
             raise ValueError("Index is not initialized. Call setup_index first.")
 
         retriever = VectorIndexRetriever(index=self.index, similarity_top_k=5)
-        query_engine = RetrieverQueryEngine.from_args(
-            retriever, service_context=ServiceContext.from_defaults(llm=self.llm)
-        )
+        query_engine = RetrieverQueryEngine.from_args(retriever, llm=self.llm)
 
         tools = [
             QueryEngineTool(
@@ -240,9 +241,7 @@ class DocumentService:
                         )
                         return table_response
                 else:
-                    formatted_response = (
-                        f"Odgovor:\n\n{response}"
-                    )
+                    formatted_response = f"Odgovor:\n\n{response}"
                     user_session.add_message(
                         collection_name, "assistant", formatted_response
                     )
@@ -313,6 +312,12 @@ class DocumentService:
         Vraća tip dokumenta za danu kolekciju.
         """
         return self.document_type.get(collection_name, "unknown")
+
+    def is_collection_initialized(self, collection_name: str) -> bool:
+        """
+        Provjerava je li kolekcija inicijalizirana.
+        """
+        return collection_name in self.agents and self.collection_initialized
 
     @staticmethod
     def load_prompt(file_path: str) -> str:

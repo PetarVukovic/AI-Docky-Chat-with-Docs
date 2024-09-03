@@ -67,6 +67,16 @@ def process_input(user_id: int, collection_name: str):
         st.session_state.thinking = True
 
         try:
+            # Check if the collection is initialized
+            if not st.session_state.document_service.is_collection_initialized(
+                collection_name
+            ):
+                st.error(
+                    f"Collection '{collection_name}' is not initialized. Please set up the index first."
+                )
+                st.session_state.thinking = False
+                return
+
             document_type = st.session_state.document_service.get_document_type(
                 collection_name
             )
@@ -105,7 +115,7 @@ def process_input(user_id: int, collection_name: str):
                     "Unable to find an answer. Please try rephrasing your question."
                 )
         except Exception as e:
-            st.error(f"An error occurred: {e}")
+            st.error(f"An error occurred: {str(e)}")
 
         st.session_state.thinking = False
         st.session_state.user_input = ""
@@ -126,15 +136,34 @@ def chat_page():
             )
             if selected_collection:
                 collection_name = selected_collection[0]
+
+                # Provjera je li kolekcija inicijalizirana
+                if not st.session_state.document_service.is_collection_initialized(
+                    collection_name
+                ):
+                    st.warning(
+                        f"Collection '{collection_name}' is not initialized. Initializing now..."
+                    )
+                    try:
+                        st.session_state.document_service.setup_index(
+                            collection_name, is_existing=True
+                        )
+                        st.success(
+                            f"Successfully initialized collection: {collection_name}"
+                        )
+                    except Exception as e:
+                        st.error(
+                            f"Error initializing collection {collection_name}: {str(e)}"
+                        )
+                        return
+
                 if collection_name != st.session_state.current_collection:
                     st.session_state.current_collection = collection_name
-                    st.session_state.document_service.setup_index(
-                        collection_name, is_existing=True
-                    )
+
                 document_type = st.session_state.document_service.get_document_type(
                     collection_name
                 )
-                st.sidebar.success(
+                st.sidebar.info(
                     f"Chatting with: {collection_name} ({document_type.upper()})"
                 )
 
